@@ -2,6 +2,7 @@
 import sys
 import os
 import time
+import numpy as np
 from pysqlcipher3 import dbapi2 as sqlite
 from Lib import opencl
 
@@ -14,7 +15,8 @@ PBKDF2_ITER = 4000 # sqlcipherv2 standard is 4000
 PAGE_SIZE = 1024 # value varies on application specification, we assume db is encrypted by each page, of 1024 byte
 
 
-Encrypted_DB_PATH="EnCrypted_keyis_0205541.db"
+Encrypted_DB_PATH="EnCrypted_keyis_0090456.db"
+Encrypted_DB_PATH="F:\\vivo-backup\\wechat-dump\\EnMicroMsg.db"
 PASS_RESULT_FILE="password.txt"
 
 PYOPENCL_COMPILER_OUTPUT='1' # set to '1' to see the openCL compile errors
@@ -25,7 +27,9 @@ correct_pw=""
 def tryDecryptSQLiteDB(passwordnumlist):
 
     for value in passwordnumlist:
-
+        if isinstance(value, np.ndarray):
+            if len(value) == 1:
+                value = value[0]
         passphrase=""
         pwords=[1] * TOTAL_PASS_LENGTH
 
@@ -35,7 +39,7 @@ def tryDecryptSQLiteDB(passwordnumlist):
                 pwords[TOTAL_PASS_LENGTH-1-i]=val+87 # hex char, sqlcipher db uses lower case of abcdef, a means 10, 'a'=97, offset=97-10=87
             else:
                 pwords[TOTAL_PASS_LENGTH-1-i]=val+48 # numbers, 0 means 0, '0'=48, offset=48-0=48
-            value=value/16
+            value=value // 16
 
         for pword in pwords:
             passphrase+=chr(pword)
